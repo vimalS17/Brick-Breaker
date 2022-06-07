@@ -1,130 +1,153 @@
-let ball_x, ball_y, ball_dx, ball_dy, ball_diameter, paddle_height, paddle_width, paddle_x, paddle_y, block_x, block_y, block_width, block_height;
-let brickRowCount,brickColumnCount, brickWidth, brickHeight, brickPadding, brickOffsetTop, brickOffsetLeft;
+let ball_x, ball_y, ball_dx, ball_dy, ball_diameter;
+let paddle_x, paddle_y, paddle_dx, paddle_dy, paddle_length, paddle_width;
+let brickWidth, brickHeight, brickPadding, brickOffsetTop, brickOffsetLeft;
 let brickX, brickY, bricks_visible;
-let isTouched = false;
-
-
 let rightPressed, leftPressed;
-
-
-
 let bricks = [];
 let score = 0;
 let life = 3;
-// let interval=setInterval(draw,10);
+
 
 function setup() {
   createCanvas(400, 400);
   background("black");
   fill("white");
-  ball_x = width/2;
-  ball_y = height/2;
+  // fill(0, 102, 153, 51);
+
+  // circle(x,y,radius)
+  ball_x = width / 2;
+  ball_y = height / 2;
+  ball_dx = 3;
+  ball_dy = -2;
   ball_diameter = 30;
-  ball_dx = 7;
-  ball_dy = -5;
-  paddle_height = 20;
-  paddle_width = 90;
-  paddle_x = width/2 - paddle_width/2;
-  paddle_y = height - paddle_height;
-  brickRowCount = 5;
-  brickColumnCount = 6;
-  brickWidth = 50;
-  brickHeight = 15;
-  brickPadding = 10;
+
+  //paddle
+  paddle_length = 90;
+  paddle_width = 20;
+  paddle_x = width / 2 - (paddle_length / 2);
+  paddle_y = height - paddle_width;
+
+  //brick
+  brickWidth = 60;
+  brickHeight = 20;
+  brickPadding = 15;
   brickOffsetTop = 50;
-  brickOffsetLeft = 25;
-  bricks_visible=true;
+  brickOffsetLeft = 57.5;
+  bricks_visible = true;
 
   rightPressed = false;
   leftPressed = false;
-  
-  for(let i=0; i<brickColumnCount; i++) {
-bricks[i] = [];
-for(let j=0; j<brickRowCount; j++) {
-bricks[i][j] = { x: 0, y: 0, status: 1 };
-}
-}
+
+  for (let i = 0; i < 4; i++) {
+    bricks[i] = [];
+    for (let j = 0; j < 4; j++) {
+      bricks[i][j] = { x: 0, y: 0, status: 1 };
+    }
+  }
+
 
 }
+
+
 
 function draw() {
-  background("black");
-  circle(ball_x, ball_y, 30);
-  rect(paddle_x, paddle_y, paddle_width, paddle_height)
+
+  background("black")
+
+  circle(ball_x, ball_y, ball_diameter);
+
+  textSize(15);
+  text(`Score: ${score}`, 20, 30);
+
+  textSize(15);
+  text(`Life: ${life}`, 330, 30);
+
   ball_x += ball_dx;
   ball_y += ball_dy;
-  
-  textSize(30);
-  text(`Score:${score}`, 30, 40)
-  
-  
-  textSize(30);
-  text(`lives :${life}`, 280, 40)
-  
-  if(ball_x > width - ball_diameter/2 || ball_x < 0 + ball_diameter/2){
+
+  if (ball_x + ball_dx > width - ball_diameter / 2 || ball_x + ball_dx < ball_diameter / 2) {
     ball_dx = -ball_dx;
   }
-  
-  if( ball_y < 0 + ball_diameter/2){
+
+  if (ball_y + ball_dy < ball_diameter / 2) {
     ball_dy = -ball_dy;
-  }
-  if(ball_y > height -ball_diameter/2 ){
-    // ball_x = width/2;
-    // ball_y = height - ball_diameter/2;
-    ball_dx = 0;
-    ball_dy = 0;
-    life-=life;
-    if(life>0){
-      refereshAll();
+  } 
+  else if (ball_y + ball_dy > height - ball_diameter / 2) {
+    if (life > 0) {
+      life--;
+      ball_x = width / 2;
+      ball_y = height / 2;
+
+    } else {
+      alert(`GAME OVER! YOUR SCORE IS ${score}`);
+      ball_x = width / 2;
+      ball_y = height / 2;
+      ball_dx = 0;
+      ball_dy = 0;
     }
-    // isTouched = true;
-    // if(isTouched) life--;
   }
-  if(ball_y + paddle_height + ball_diameter/2 >= height && (ball_x >= paddle_x && ball_x <= paddle_x + paddle_width)){
-    ball_dy = -ball_dy;
-    // ball_dx = -ball_dx;
-  }
+
+  ball_x += ball_dx;
+  ball_y += ball_dy;
+
+  rect(paddle_x, paddle_y, paddle_length, paddle_width);
+
+  //Changing the location not smooth
   if (keyIsDown(LEFT_ARROW)) {
-    if(paddle_x > 0){
-   paddle_x = paddle_x - 4;
+    if (paddle_x > 0) {
+      paddle_x = paddle_x - 5;
     }
   }
   if (keyIsDown(RIGHT_ARROW)) {
-    if(paddle_x < width - paddle_width){
-    paddle_x = paddle_x + 4;
+    if (paddle_x + (paddle_length) < width) {
+      paddle_x = paddle_x + 5;
     }
   }
-  
-      // build bricks
-    for(let i=0; i<brickColumnCount; i++) {
-    for(let j=0; j<brickRowCount; j++) {
-    if(bricks[i][j].status == 1){
-    brickX = (i*(brickWidth+brickPadding))+brickOffsetLeft;
-    brickY = (j*(brickHeight+brickPadding))+brickOffsetTop;
-    bricks[i][j].x = brickX;
-    bricks[i][j].y = brickY;
-    // canvas.beginPath();
-    rect(brickX, brickY, brickWidth, brickHeight);
-    fill(bricks_visible? 'white' : 'transparent');
-    // canvas.closePath();
-    }
-    }
-    }
-  
-      for (let i = 0; i < brickColumnCount; i++) {
-    for (let j = 0; j < brickRowCount; j++) {
-    let b = bricks[i][j];
-    if (b.status == 1) {
-    if (ball_x > b.x && ball_x < b.x + brickWidth && ball_y > b.y && ball_y < b.y + brickHeight) {
+
+  //Ball hits the paddle and bounces back
+  if (
+    ball_x - ball_diameter / 2 >= paddle_x &&
+    ball_x + ball_diameter / 2 <= paddle_x + paddle_length &&
+    ball_y + ball_diameter / 2 >= paddle_y
+  ) {
     ball_dy = -ball_dy;
-    b.status = 0;
-    score++;
-    if(score == brickRowCount*brickColumnCount) {
-    alert("YOU WIN, CONGRATULATIONS!");
-    }
-    }
-    }
+  }
+
+
+//Building Bricks
+  for (let i = 0; i < 4; i++) {
+    for (let j = 0; j < 4; j++) {
+      if (bricks[i][j].status == 1) {
+        brickX = (i * (brickWidth + brickPadding)) + brickOffsetLeft;
+        brickY = (j * (brickHeight + brickPadding)) + brickOffsetTop;
+        bricks[i][j].x = brickX;
+        bricks[i][j].y = brickY;
+        rect(brickX, brickY, brickWidth, brickHeight);
+        fill(bricks_visible ? 'white' : 'transparent');
+      }
     }
   }
   
+  for (let i = 0; i < 4; i++) {
+    for (let j = 0; j < 4; j++) {
+      let brick = bricks[i][j];
+      if (brick.status == 1) {
+        if (ball_x > brick.x && ball_x < brick.x + brickWidth && ball_y > brick.y && ball_y < brick.y + brickHeight) {
+          ball_dy = -ball_dy;
+          score++;
+          brick.status = 0;
+          if (score == 4 * 4) {
+            alert(`CONGRATULATIONS! YOU WON THE GAME WITH ${life} REMAINING`);
+            ball_x = width / 2;
+            ball_y = height / 2;
+            ball_dx = 0;
+            ball_dy = 0;
+          }
+        }
+      }
+    }
+  }
+
+
+
 }
